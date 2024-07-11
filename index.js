@@ -45,7 +45,6 @@ async function run() {
             // get job by id || single job || job details
             app.get('/job/:id', async (req, res) => {
                   const id = req.params.id;
-                  console.log('job id', id);
                   const query = { _id: new ObjectId(id) }
                   const result = await allJobCollection.findOne(query);
                   res.send(result)
@@ -85,6 +84,58 @@ async function run() {
                   const result = await allJobCollection.updateOne(query, updateDoc, options)
                   res.send(result)
             })
+
+            // ---------------------
+            // put/update job by id || single job || increment applicants
+            // app.put('/allJobs/applicants/number/:id', async (req, res) => {
+            //       const id = req.params.id;
+            //       const query = { _id: new ObjectId(id) };
+            //       const job = await allJobCollection.findOne(query);
+            //       if (job) {
+            //             const updatedApplicantsNumber = job.applicantsNumber + 1;
+
+            //             const updateDoc = {
+            //                   $set: {
+            //                         applicantsNumber: updatedApplicantsNumber
+            //                   }
+            //             };
+            //       }
+            //       const result = await allJobCollection.updateOne(query, updateDoc);
+            //       res.send(result);
+            // })
+
+            // user || applied jobs
+
+            // app.get('/user/appliedJobs', async (req, res) => {
+
+            //       // verify token owner
+            //       if (req.query?.loggedEmail !== req.user?.email) {
+            //             return res.status(403).send({ message: 'Forbidden' })
+            //       }
+
+            //       let query = {};
+            //       if (req.query.loggedEmail) {
+            //             query = { loggedEmail: req.query.loggedEmail };
+            //       }
+            //       const result = await appliedJobCollection.find(query).toArray();
+            //       res.send(result);
+            // });
+
+            // applied jobs
+            app.post('/applied-jobs', async (req, res) => {
+                  const job = req.body;
+                  console.log(job);
+                  // const isExist = await appliedJobCollection.findOne({ jobId: job.jobId, loggedUser: job.loggedUser })
+
+                  // if (isExist) {
+                  //       res.send({ message: 'Already Added' })
+                  //       return;
+                  // }
+                  const result = await appliedJobCollection.insertOne(job);
+                  res.send(result)
+            })
+
+
 
             // Send a ping to confirm a successful connection
             // await client.db("admin").command({ ping: 1 });
