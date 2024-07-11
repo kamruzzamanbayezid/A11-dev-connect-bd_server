@@ -26,8 +26,15 @@ async function run() {
             // Connect the client to the server	(optional starting in v4.7)
             // await client.connect();
 
+            const allJobCollection = client.db("dev-connect-bd-DB").collection('allJobs');
+            const appliedJobCollection = client.db("dev-connect-bd-DB").collection('appliedJobs');
 
-
+            // post job by a logged in user through addAJob
+            app.post('/allJobs', async (req, res) => {
+                  const job = req.body;
+                  const result = await allJobCollection.insertOne(job);
+                  res.send(result)
+            })
 
             // Send a ping to confirm a successful connection
             // await client.db("admin").command({ ping: 1 });
