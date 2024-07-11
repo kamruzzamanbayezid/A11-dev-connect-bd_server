@@ -59,6 +59,19 @@ async function run() {
                   res.send(result);
             });
 
+            // get user job that he added 
+            app.get('/my-jobs/:email', async (req, res) => {
+                  const query = { userEmail: req.params?.email }
+                  const result = await allJobCollection.find(query).toArray();
+                  res.send(result);
+            });
+
+            // delete a job by id
+            app.delete('/job/:id', async (req, res) => {
+                  const result = await allJobCollection.deleteOne({ _id: new ObjectId(req.params?.id) });
+                  res.send(result);
+            })
+
             // Send a ping to confirm a successful connection
             // await client.db("admin").command({ ping: 1 });
             console.log("Pinged your deployment. You successfully connected to MongoDB!");
