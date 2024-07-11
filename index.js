@@ -30,11 +30,25 @@ async function run() {
             const appliedJobCollection = client.db("dev-connect-bd-DB").collection('appliedJobs');
 
             // post job by a logged in user through addAJob
-            app.post('/allJobs', async (req, res) => {
+            app.post('/all-jobs', async (req, res) => {
                   const job = req.body;
                   const result = await allJobCollection.insertOne(job);
                   res.send(result)
             })
+
+            // get all jobs that added by logged user
+            app.get('/all-jobs', async (req, res) => {
+                  const result = await allJobCollection.find().toArray();
+                  res.send(result)
+            })
+
+            // get job by category
+            app.get('/all-jobs/:category', async (req, res) => {
+                  const { category } = req.params;
+                  let query = { jobCategory: category };
+                  const result = await allJobCollection.find(query).toArray();
+                  res.json(result);
+            });
 
             // Send a ping to confirm a successful connection
             // await client.db("admin").command({ ping: 1 });
