@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(cors({
       origin: [
-            'http://localhost:5173',
+            'https://a11-dev-connect-bd.web.app',
       ],
       credentials: true
 }));
