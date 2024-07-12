@@ -2,12 +2,20 @@ const express = require('express')
 const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
 // middleware
-app.use(cors());
+app.use(cors({
+      origin: [
+            'http://localhost:5173',
+      ],
+      credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser());
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.d8abmis.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -28,6 +36,21 @@ async function run() {
 
             const allJobCollection = client.db("dev-connect-bd-DB").collection('allJobs');
             const appliedJobCollection = client.db("dev-connect-bd-DB").collection('appliedJobs');
+
+
+            // json web token
+            app.post('/jwt', async (req, res) => {
+                  const user = req.body;
+                  const token = jwt.sign(user, process.env.ACCESS_SECRET_TOKEN, { expiresIn: '1h' })
+                  res
+                        .cookie('token', token, {
+                              httpOnly: true,
+                              secure: true,
+                              sameSite: 'none',
+                        })
+                        .send({ message: true })
+
+            })
 
             // post job by a logged in user through addAJob
             app.post('/all-jobs', async (req, res) => {
@@ -85,27 +108,7 @@ async function run() {
                   res.send(result)
             })
 
-            // ---------------------
-            // put/update job by id || single job || increment applicants
-            // app.put('/allJobs/applicants/number/:id', async (req, res) => {
-            //       const id = req.params.id;
-            //       const query = { _id: new ObjectId(id) };
-            //       const job = await allJobCollection.findOne(query);
-            //       if (job) {
-            //             const updatedApplicantsNumber = job.applicantsNumber + 1;
-
-            //             const updateDoc = {
-            //                   $set: {
-            //                         applicantsNumber: updatedApplicantsNumber
-            //                   }
-            //             };
-            //       }
-            //       const result = await allJobCollection.updateOne(query, updateDoc);
-            //       res.send(result);
-            // })
-
             // user || applied jobs
-
             app.get('/applied-jobs', async (req, res) => {
 
                   // // verify token owner
@@ -124,13 +127,6 @@ async function run() {
             // applied jobs
             app.post('/applied-jobs', async (req, res) => {
                   const job = req.body;
-                  console.log(job);
-                  // const isExist = await appliedJobCollection.findOne({ jobId: job.jobId, loggedUser: job.loggedUser })
-
-                  // if (isExist) {
-                  //       res.send({ message: 'Already Added' })
-                  //       return;
-                  // }
                   const result = await appliedJobCollection.insertOne(job);
                   res.send(result)
             })
