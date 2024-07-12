@@ -18,6 +18,23 @@ app.use(express.json());
 app.use(cookieParser());
 
 
+// verify token
+const verifyToken = (req, res, next) => {
+      const token = req.cookies.token;
+      if (!token) {
+            return res.status(401).send({ message: 'Unauthorized Access' })
+      }
+      jwt.verify(token, process.env.ACCESS_SECRET_TOKEN, (err, decoded) => {
+            if (err) {
+                  res.status(401).send({ message: 'Unauthorized Access' })
+            }
+            req.user = decoded
+            next()
+      })
+}
+
+
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.d8abmis.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -52,6 +69,18 @@ async function run() {
 
             })
 
+            // clear token
+            app.post('/logout', async (req, res) => {
+                  const user = req.body;
+                  res
+                        .clearCookie('token', {
+                              maxAge: 0,
+                              secure: true,
+                              sameSite: 'none',
+                        },)
+                        .send({ success: true })
+            })
+
             // post job by a logged in user through addAJob
             app.post('/all-jobs', async (req, res) => {
                   const job = req.body;
@@ -82,7 +111,13 @@ async function run() {
             });
 
             // get user job that he added 
-            app.get('/my-jobs/:email', async (req, res) => {
+            app.get('/my-jobs/:email', verifyToken, async (req, res) => {
+
+                  // verify token owner
+                  if (req.params?.email !== req.user?.email) {
+                        return res.status(403).send({ message: 'Forbidden' })
+                  }
+
                   const query = { userEmail: req.params?.email }
                   const result = await allJobCollection.find(query).toArray();
                   res.send(result);
@@ -109,12 +144,12 @@ async function run() {
             })
 
             // user || applied jobs
-            app.get('/applied-jobs', async (req, res) => {
+            app.get('/applied-jobs', verifyToken, async (req, res) => {
 
-                  // // verify token owner
-                  // if (req.query?.loggedEmail !== req.user?.email) {
-                  //       return res.status(403).send({ message: 'Forbidden' })
-                  // }
+                  // verify token owner
+                  if (req.query?.loggedEmail !== req.user?.email) {
+                        return res.status(403).send({ message: 'Forbidden' })
+                  }
 
                   let query = {};
                   if (req.query.loggedEmail) {
