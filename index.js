@@ -106,20 +106,20 @@ async function run() {
 
             // user || applied jobs
 
-            // app.get('/user/appliedJobs', async (req, res) => {
+            app.get('/applied-jobs', async (req, res) => {
 
-            //       // verify token owner
-            //       if (req.query?.loggedEmail !== req.user?.email) {
-            //             return res.status(403).send({ message: 'Forbidden' })
-            //       }
+                  // // verify token owner
+                  // if (req.query?.loggedEmail !== req.user?.email) {
+                  //       return res.status(403).send({ message: 'Forbidden' })
+                  // }
 
-            //       let query = {};
-            //       if (req.query.loggedEmail) {
-            //             query = { loggedEmail: req.query.loggedEmail };
-            //       }
-            //       const result = await appliedJobCollection.find(query).toArray();
-            //       res.send(result);
-            // });
+                  let query = {};
+                  if (req.query.loggedEmail) {
+                        query = { loggedEmail: req.query.loggedEmail };
+                  }
+                  const result = await appliedJobCollection.find(query).toArray();
+                  res.send(result);
+            });
 
             // applied jobs
             app.post('/applied-jobs', async (req, res) => {
